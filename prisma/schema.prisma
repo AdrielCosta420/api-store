@@ -32,8 +32,6 @@ model Product {
   color           String
   size            String
   quantity        Int // Total quantity of this product
-  quantityByModel Int // Quantity of this model
-  quantityByColor Int // Quantity of this color
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

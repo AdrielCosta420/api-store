@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest, FastifyReply } from "fastify";
-import { RegisterSalesController } from '../controllers/RegisterSalesController';
-import { GetSalesController } from "../controllers/GetSalesController";
-
+// import { RegisterSalesController } from '../controllers/RegisterSalesController';
+// import { GetSalesController } from "../controllers/GetSalesController";
+import { SaleController } from "../controllers/SaleController";
 export async function SaleRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
     fastify.addHook('onRequest', async (request, reply) => {
         try {
@@ -15,11 +15,11 @@ export async function SaleRoutes(fastify: FastifyInstance, options: FastifyPlugi
 
     fastify.post('/sales', async (request: FastifyRequest, reply: FastifyReply) => {
 
-        return new RegisterSalesController().handle(request, reply);
+        return new SaleController().registerSale(request, reply);
     });
 
     fastify.get('/sales', async (request: FastifyRequest, reply: FastifyReply) => {
-        return new GetSalesController().handle(request, reply);
+        return new SaleController().getSales(request, reply);
     });
 
 } 

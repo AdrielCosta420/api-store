@@ -1,10 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest, FastifyReply } from "fastify";
-import { ListProductController } from "../controllers/ListProductController";
-import { CreateProductController } from "../controllers/CreateProductController";
-import { DeleteProductController } from "../controllers/DeleteProductController";
-
-
-
+import { ProductController } from "../controllers/ProductController";
 export async function ProductRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
 
     // Middleware para proteger a rota
@@ -17,14 +12,18 @@ export async function ProductRoutes(fastify: FastifyInstance, options: FastifyPl
     });
 
     fastify.get('/products', async (request: FastifyRequest, reply: FastifyReply) => {
-        return new ListProductController().handle(request, reply);
+        return new ProductController().getAllProducts(request, reply);
     })
 
     fastify.post('/product', async (request: FastifyRequest, reply: FastifyReply) => {
-        return new CreateProductController().handle(request, reply);
+        return new ProductController().createProduct(request, reply);
     })
 
     fastify.delete('/product', async (request: FastifyRequest, reply: FastifyReply) => {
-        return new DeleteProductController().handle(request, reply);
-    }     )
+        return new ProductController().deleteProduct(request, reply);
+    })
+
+    fastify.get('/product', async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ProductController().getProductById(request, reply);
+    })
 }

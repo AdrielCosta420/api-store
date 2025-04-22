@@ -8,8 +8,8 @@ interface RegisterSalesProps {
     clientName?: string;
 }
 
-export class RegisterSalesService {
-    async execute({
+export class SalesService {
+    async registerSale({
         productId,
         quantity,
         totalPrice,
@@ -30,9 +30,7 @@ export class RegisterSalesService {
             }
 
             const product = await prisma.product.findUnique({
-                where: {
-                    id: productId,
-                },
+                where: { id: productId },
             });
 
             if (!product) {
@@ -44,9 +42,7 @@ export class RegisterSalesService {
             }
 
             await prisma.product.update({
-                where: {
-                    id: productId,
-                },
+                where: { id: productId },
                 data: {
                     quantity: product.quantity - quantity,
                 },
@@ -59,11 +55,33 @@ export class RegisterSalesService {
                     totalPrice,
                     paymentMethod: paymentMethod || "",
                     clientName: clientName || "",
-                    
                 },
             });
         } catch (error: any) {
             throw new Error(`Erro ao registrar venda: ${error.message}`);
+        }
+    }
+
+    async getSales() {
+        try {
+            const sales = await prisma.sale.findMany({
+                include: { product: true },
+            });
+            return sales;
+        } catch (error) {
+            throw new Error("Erro ao buscar vendas.");
+        }
+    }
+
+    async getLastSale() {
+        try {
+            const lastSale = await prisma.sale.findFirst({
+                orderBy: { createdAt: "desc" },
+                include: { product: true },
+            });
+            return lastSale;
+        } catch (error) {
+            throw new Error("Erro ao buscar a última venda.");
         }
     }
 }
