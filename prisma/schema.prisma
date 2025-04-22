@@ -22,7 +22,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map("users")
-  Sale Sale[]
+
 }
 
 model Product {
@@ -46,10 +46,10 @@ model Sale {
   productId  String   @db.ObjectId
   product    Product  @relation(fields: [productId], references: [id])
   quantity   Int
-  total      Float
+  totalPrice      Float
   createdAt  DateTime @default(now())
-  userId     String?  @db.ObjectId // Opcional: quem fez a venda
-  user       User?    @relation(fields: [userId], references: [id])
+  paymentMethod String
+  clientName String
 
   @@map("sales")
 }
