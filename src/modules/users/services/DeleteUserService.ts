@@ -4,6 +4,7 @@ import prisma from '../../../prisma';
 
 class DeleteUserService {
     async execute(id: string) {
+       
         if (!id) {
             throw new Error("Solicitação Inválida");
         }

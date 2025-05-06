@@ -8,11 +8,11 @@ interface CredentialsProps {
 
 class AuthService {
 
-    // Função de autenticação
+  
     async execute({ email, password }: CredentialsProps) {
 
         if (!email || !password) {
-            throw new Error('Preencha todos os campos.')
+            throw { statusCode: 401, message: 'Usuário não encontrado.' }
         }
 
         // Buscar usuário por email
@@ -21,15 +21,13 @@ class AuthService {
         });
 
         if (!user) {
-            throw new Error('Usuário não encontrado.')
+            throw { statusCode: 401, message: 'Usuário não encontrado.' }
         }
         
-        console.log(password)
-        console.log(user.password)
-        // Comparar a senha
+
         const passwordValid = await bcrypt.compare(password, user.password);
         if (!passwordValid) {
-            throw new Error('E-mail ou senha inválido.');
+            throw { statusCode: 404, message: 'Usuário não encontrado.' }
         }
 
         // Retornar o usuário autenticado

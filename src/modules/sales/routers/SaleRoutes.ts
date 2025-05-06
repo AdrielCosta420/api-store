@@ -1,25 +1,32 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest, FastifyReply } from "fastify";
-// import { RegisterSalesController } from '../controllers/RegisterSalesController';
-// import { GetSalesController } from "../controllers/GetSalesController";
+
 import { SaleController } from "../controllers/SaleController";
+import { authenticate } from "../../../middlewares/authenticate"; // Importando o middleware de autenticação
 export async function SaleRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
-    fastify.addHook('onRequest', async (request, reply) => {
-        try {
-
-            await request.jwtVerify();
-
-        } catch (err) {
-            reply.code(401).send({ error: 'Token inválido ou não fornecido' });
-        }
+    
+    fastify.get('/sales/protected', {
+        preValidation: [authenticate], 
+    }, async () => {
+        return { message: 'Você está autenticado!' };
     });
 
-    fastify.post('/sales', async (request: FastifyRequest, reply: FastifyReply) => {
+    fastify.post('/sales',{
+        preValidation: [authenticate],
+    },async (request: FastifyRequest, reply: FastifyReply) => {
 
         return new SaleController().registerSale(request, reply);
     });
 
-    fastify.get('/sales', async (request: FastifyRequest, reply: FastifyReply) => {
+    fastify.get('/sales',{
+        preValidation: [authenticate],
+    },async (request: FastifyRequest, reply: FastifyReply) => {
         return new SaleController().getSales(request, reply);
     });
+
+    fastify.get('/sales-last',{
+        preValidation: [authenticate],
+    },async (request: FastifyRequest, reply: FastifyReply) => {
+        return new SaleController().getLastSales(request, reply);
+    })
 
 } 

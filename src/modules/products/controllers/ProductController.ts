@@ -1,11 +1,22 @@
 import { ProductService } from "../services/ProductService";
 import { FastifyRequest, FastifyReply } from "fastify";
 
+interface CreateProductBody {
+    model: string;
+    price: number;
+    color: string;
+    size: string;
+    quantity: number;
+
+  }
+  
+
+
 export class ProductController {
 
-    async createProduct(request: FastifyRequest, reply: FastifyReply) {
+    async createProduct(request: FastifyRequest<{ Body: CreateProductBody }>, reply: FastifyReply) {
         try {
-            const { model, price, color, size, quantity, quantityByModel, quantityByColor } = request.body as any;
+            const { model, price, color, size, quantity } = request.body ;
 
             const service = new ProductService();
 
@@ -16,8 +27,7 @@ export class ProductController {
                 color,
                 size,
                 quantity,
-                quantityByModel,
-                quantityByColor
+            
             });
 
             if (!createdProduct) {
@@ -34,10 +44,10 @@ export class ProductController {
 
     }
 
-    async deleteProduct(request: FastifyRequest, reply: FastifyReply) {
+    async statusProduct(request: FastifyRequest, reply: FastifyReply) {
         try {
 
-            const { id } = request.body as any;
+            const { id, active } = request.body as any;
 
             if (!id) {
                 return reply.status(400).send({ error: 'ID do produto desconhecido.' });
@@ -46,19 +56,22 @@ export class ProductController {
             const service = new ProductService();
 
             const findProduct = await service.getProductById(id);
-
             if (!findProduct) {
                 return reply.status(400).send({ error: 'Produto não encontrado.' });
-            }
+            }   
 
-            const deletedProduct = await service.deleteProduct(id);
-
+            
+            const deletedProduct = await service.statusProduct(id, active);
+  
 
             if (!deletedProduct) {
-                return reply.status(400).send({ error: 'Não foi possível deletar o produto.' });
+                return reply.status(400).send({ error: 'Não foi possível alterar o status do Produto.' });
             }
-        } catch (error) {
 
+            const message = active ? 'Produto ativado com sucesso.' : 'Produto desativado com sucesso.';
+            return reply.status(200).send({ message });
+        } catch (error) {
+            return reply.status(500).send({ error: 'Erro interno no servidor.' });
         }
     }
 
@@ -99,6 +112,7 @@ export class ProductController {
             return reply.status(500).send({ error: 'Erro interno no servidor.' });
         }
     }
+
 
 
 }

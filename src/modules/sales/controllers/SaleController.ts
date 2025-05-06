@@ -33,4 +33,16 @@ export class SaleController {
             return reply.status(400).send({message: 'Não foi possível buscar as vendas.'});
         }
     }
+
+    async getLastSales(_: FastifyRequest, reply: FastifyReply) {
+        const salesService = new SalesService();
+
+        try {
+            const lastSale = await salesService.getLastSales();
+            return reply.status(200).send(lastSale);
+        } catch (error) {
+            return reply.status(400).send({message: 'Não foi possível buscar a última venda.'});
+        }
+    }
+
 }

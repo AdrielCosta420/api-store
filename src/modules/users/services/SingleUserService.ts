@@ -2,7 +2,7 @@ import prisma from '../../../prisma';
 
 export class SingleUserService {
     async execute(id: string) {
-
+        console.log(id);
         if (!id) {
             throw new Error("Id não informado.");
         }

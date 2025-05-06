@@ -22,32 +22,33 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map("users")
-
 }
 
 model Product {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  price           Float
-  model           String
-  color           String
-  size            String
-  quantity        Int // Total quantity of this product
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  price     Float
+  model     String
+  color     String
+  size      String
+  quantity  Int
+  totalSold Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Sale      Sale[]
 
   @@map("products")
-  Sale Sale[]
 }
 
 model Sale {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  productId  String   @db.ObjectId
-  product    Product  @relation(fields: [productId], references: [id])
-  quantity   Int
-  totalPrice      Float
-  createdAt  DateTime @default(now())
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId     String   @db.ObjectId
+  product       Product  @relation(fields: [productId], references: [id])
+  quantity      Int
+  totalPrice    Float
+  createdAt     DateTime @default(now())
   paymentMethod String
-  clientName String
+  clientName    String
 
   @@map("sales")
 }

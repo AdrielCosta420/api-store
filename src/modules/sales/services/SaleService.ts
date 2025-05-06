@@ -73,11 +73,12 @@ export class SalesService {
         }
     }
 
-    async getLastSale() {
+    async getLastSales() {
         try {
-            const lastSale = await prisma.sale.findFirst({
+            const lastSale = await prisma.sale.findMany({
                 orderBy: { createdAt: "desc" },
                 include: { product: true },
+                take: 3,
             });
             return lastSale;
         } catch (error) {

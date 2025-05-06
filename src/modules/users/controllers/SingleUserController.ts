@@ -3,7 +3,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 
 export class SingleUserController {
     async handle(request: FastifyRequest, reply: FastifyReply) {
-        const { id } = request.params as { id: string };
+        const { id } = request.query as { id: string };
         console.log(id);
         const singleUserService = new SingleUserService();
 

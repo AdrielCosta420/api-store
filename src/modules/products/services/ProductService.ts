@@ -7,19 +7,18 @@ interface CreateProductProps {
     color: string;
     size: string;
     quantity: number;
-    quantityByModel: number;
-    quantityByColor: number;
+
 
 }
 
 export class ProductService {
 
-    async createProduct({ model, price, color, size, quantity, quantityByModel, quantityByColor }: CreateProductProps) {
+    async createProduct({ model, price, color, size, quantity }: CreateProductProps) {
         if (!model || price === undefined || !color || !size || !quantity ) {
             throw new Error('Preencha todos os campos.')
         }
 
-        if (quantity < 0 || quantityByModel < 0 || quantityByColor < 0) {
+        if (quantity < 0 ) {
             throw new Error('Quantidade não pode ser negativa.')
         }
 
@@ -34,43 +33,40 @@ export class ProductService {
                 color: color,
                 size: size,
                 quantity: quantity,
-        
+                active: true,
             }
         });
     }
 
-    async deleteProduct(id: string) {
+    async statusProduct(id: string, active: boolean) {
+        console.log('delete product id SERVICE: ', id);
         if (!id) {
-            throw new Error("Solicitação Inválida");
+            throw new Error("Id do produto não informado ou inválido.");
         }
-        const findProduct = await prisma.product.findFirst({
-            where: {
-                id: id
-            }
-        });
+       
+        await prisma.product.update({
+            where: { id },
+            data: { active: active }
+          });
 
-        if (!findProduct) {
-            throw new Error("Produto não encontrado.");
-
-        }
-
-        await prisma.product.delete({ where: { id: findProduct.id } });
-        return { message: 'Deletado com succeso!' };
+      
+        return { message: 'Produto Desativado com sucesso!' };
     }
 
     async getAllProducts() {
-        const products = await prisma.product.findMany();
-        if (!products || products.length === 0) {
-            throw new Error("Nenhum produto encontrado.");
-        }
+        const products = await prisma.product.findMany({ where: { active: true } });
+
+        
         return products;
     }
 
     async getProductById(id: string) {
+        console.log('get product id: ', id);
+        
         if (!id) {
             throw new Error("Solicitação Inválida");
         }
-        const product = await prisma.product.findUnique({
+        const product = await prisma.product.findFirst({
             where: {
                 id: id
             }
@@ -79,7 +75,7 @@ export class ProductService {
         if (!product) {
             throw new Error("Produto não encontrado.");
         }
-
+        
         return product;
     }
 
@@ -102,16 +98,4 @@ export class ProductService {
             data: data
         });
     }
-    
-    async getLastProduct() {
-        try {
-            const lastProduct = await prisma.product.findFirst({
-                orderBy: { createdAt: "desc" },
-            });
-            return lastProduct;
-        } catch (error) {
-            throw new Error("Erro ao buscar o último produto.");
-        }
-    }
-
 }
