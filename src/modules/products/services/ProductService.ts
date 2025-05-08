@@ -7,14 +7,16 @@ interface CreateProductProps {
     color: string;
     size: string;
     quantity: number;
+    collectionName: string;
+    collectionId: string; 
 
 
 }
 
 export class ProductService {
 
-    async createProduct({ model, price, color, size, quantity }: CreateProductProps) {
-        if (!model || price === undefined || !color || !size || !quantity ) {
+    async createProduct({ model, price, color, size, quantity, collectionName, collectionId }: CreateProductProps) {
+        if (!model || price === undefined || !color || !size || !quantity || !collectionName || !collectionId) {
             throw new Error('Preencha todos os campos.')
         }
 
@@ -26,16 +28,29 @@ export class ProductService {
             throw new Error('Preço não pode ser negativo.')
         }
 
-        return await prisma.product.create({
+        const product = await prisma.product.create({
             data: {
-                model: model,
-                price: price,
-                color: color,
-                size: size,
-                quantity: quantity,
-                active: true,
+            model: model,
+            price: price,
+            color: color,
+            size: size,
+            quantity: quantity,
+            active: true,
+            collectionId: collectionId,
+            collectionName: collectionName
             }
         });
+
+        await prisma.collection.update({
+            where: { id: collectionId },
+            data: {
+            products: {
+                push: product.id
+            }
+            }
+        });
+
+        return product;
     }
 
     async statusProduct(id: string, active: boolean) {
@@ -54,6 +69,7 @@ export class ProductService {
     }
 
     async getAllProducts() {
+        console.log('get all products');
         const products = await prisma.product.findMany({ where: { active: true } });
 
         
@@ -97,5 +113,41 @@ export class ProductService {
             where: { id: findProduct.id },
             data: data
         });
+    }
+
+    async getProductsByCollectionId(collectionId: string) {
+        if (!collectionId) {
+            throw new Error("Solicitação Inválida");
+        }
+
+        const products = await prisma.product.findMany({
+            where: {
+                collectionId: collectionId
+            }
+        });
+
+        if (!products) {
+            throw new Error("Produto não encontrado.");
+        }
+
+        return products;
+    }
+
+    async getTopProducts() {
+        const products = await prisma.product.findMany({
+            where: {
+                active: true
+            },
+            orderBy: {
+                totalSold: 'desc'
+            },
+            take: 3
+        });
+
+        if (!products) {
+            throw new Error("Produto não encontrado.");
+        }
+
+        return products;
     }
 }

@@ -8,6 +8,8 @@ interface CreateProductBody {
     color: string;
     size: string;
     quantity: number;
+    collectionName: string;
+    collectionId: string;
 
 }
 
@@ -42,4 +44,23 @@ export async function ProductRoutes(fastify: FastifyInstance, options: FastifyPl
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         return new ProductController().getProductById(request, reply);
     });
+
+    fastify.patch('/product', {
+        preValidation: [authenticate], 
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ProductController().updateProduct(request, reply);
+    });
+
+    fastify.get('/products-by-collection', {
+        preValidation: [authenticate],
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ProductController().getProductsByCollectionId(request, reply);
+    });
+
+    fastify.get('/products-top', {
+        preValidation: [authenticate],
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ProductController().getTopProducts(request, reply);
+    });
+
 }

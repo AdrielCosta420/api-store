@@ -6,7 +6,7 @@ import { AuthRoutes } from './modules/auth/routes/AuthRoutes';
 import { UserRoutes } from './modules/users/routes/routes';
 import { ProductRoutes } from './modules/products/routes/ProductRoutes';
 import { SaleRoutes } from './modules/sales/routers/SaleRoutes';
-
+import { CollectionsProductRoutes } from './modules/collections-product/routes/CollectionsProductRoutes';
 const app = Fastify({ logger: true });
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -45,7 +45,7 @@ export const start = async () => {
     await app.register(AuthRoutes);
     await app.register(ProductRoutes);
     await app.register(SaleRoutes);
-
+    await app.register(CollectionsProductRoutes); 
     await app.listen({ port: 3333, host: '0.0.0.0' });
     console.log('Server Started!');
   } catch (error) {

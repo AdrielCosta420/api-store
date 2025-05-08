@@ -1,4 +1,6 @@
+import { CollectionsProductService } from "../../collections-product/services/CollectionsProductService";
 import { ProductService } from "../services/ProductService";
+
 import { FastifyRequest, FastifyReply } from "fastify";
 
 interface CreateProductBody {
@@ -7,16 +9,18 @@ interface CreateProductBody {
     color: string;
     size: string;
     quantity: number;
+    collectionName: string;
+    collectionId: string;
 
-  }
-  
+}
+
 
 
 export class ProductController {
 
     async createProduct(request: FastifyRequest<{ Body: CreateProductBody }>, reply: FastifyReply) {
         try {
-            const { model, price, color, size, quantity } = request.body ;
+            const { model, price, color, size, quantity, collectionId, collectionName } = request.body;
 
             const service = new ProductService();
 
@@ -27,7 +31,9 @@ export class ProductController {
                 color,
                 size,
                 quantity,
-            
+                collectionId,
+                collectionName
+
             });
 
             if (!createdProduct) {
@@ -44,6 +50,47 @@ export class ProductController {
 
     }
 
+    async updateProduct(request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const { id, model, price, color, size, quantity, collectionId, collectionName } = request.body as any;
+
+            if (!id) {
+                return reply.status(400).send({ error: 'ID do produto desconhecido.' });
+            }
+
+            if (!model || price === undefined || !color || !size || !quantity || !collectionId || !collectionName) {
+                return reply.status(400).send({ error: 'Preencha todos os campos.' });
+            }
+
+            const service = new ProductService();
+
+            const findProduct = await service.getProductById(id);
+            if (!findProduct) {
+                return reply.status(400).send({ error: 'Produto não encontrado.' });
+            }
+
+
+            const updatedProduct = await service.updateProduct(id, {
+                model,
+                price,
+                color,
+                size,
+                quantity,
+                collectionId: collectionId,
+                collectionName: collectionName,
+            })
+
+            if (!updatedProduct) {
+                return reply.status(400).send({ error: 'Não foi possível atualizar o produto.' });
+            }
+
+            return reply.status(200).send(updatedProduct);
+        } catch (error) {
+            return reply.status(500).send({ error: 'Erro interno no servidor.' });
+        }
+    }
+
+
     async statusProduct(request: FastifyRequest, reply: FastifyReply) {
         try {
 
@@ -58,11 +105,11 @@ export class ProductController {
             const findProduct = await service.getProductById(id);
             if (!findProduct) {
                 return reply.status(400).send({ error: 'Produto não encontrado.' });
-            }   
+            }
 
-            
+
             const deletedProduct = await service.statusProduct(id, active);
-  
+
 
             if (!deletedProduct) {
                 return reply.status(400).send({ error: 'Não foi possível alterar o status do Produto.' });
@@ -95,7 +142,7 @@ export class ProductController {
     async getProductById(request: FastifyRequest, reply: FastifyReply) {
         try {
             const { id } = request.query as any;
-         
+
             if (!id) {
                 return reply.status(400).send({ error: 'ID do produto desconhecido.' });
             }
@@ -113,6 +160,36 @@ export class ProductController {
         }
     }
 
+    async getProductsByCollectionId(request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const { id } = request.query as any;
+            const service = new ProductService();
+            const collectionService = new CollectionsProductService();
+            if (!id) {
+                return reply.status(400).send({ error: 'ID da coleção desconhecido.' });
+            }
+
+            const findCollection = await collectionService.getCollectionById(id);
+            if (!findCollection) {
+                return reply.status(400).send({ error: 'Coleção não encontrada.' });
+            }
+           const findProducts = await service.getProductsByCollectionId(id)
+            return reply.status(200).send(findProducts);
+        } catch (error) {
+            return reply.status(500).send({ error: 'Erro interno no servidor.' });
+        }
+    }
+
+    async getTopProducts(request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const service = new ProductService();
+            const products = await service.getTopProducts();
+
+            return reply.status(200).send(products);
+        } catch (error) {
+            return reply.status(500).send({ error: 'Erro interno no servidor.' });
+        }
+    }
 
 
 }
