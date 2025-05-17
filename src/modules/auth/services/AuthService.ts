@@ -15,7 +15,7 @@ class AuthService {
             throw { statusCode: 401, message: 'Usuário não encontrado.' }
         }
 
-        // Buscar usuário por email
+        
         const user = await prisma.user.findUnique({
             where: { email },
         });
@@ -30,7 +30,7 @@ class AuthService {
             throw { statusCode: 404, message: 'Usuário não encontrado.' }
         }
 
-        // Retornar o usuário autenticado
+      
         return user;
     }
 

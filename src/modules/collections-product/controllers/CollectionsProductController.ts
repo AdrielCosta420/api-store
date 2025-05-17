@@ -16,9 +16,11 @@ export class CollectionsProductController {
     async createCollection(request: FastifyRequest, reply: FastifyReply) {
         try {
             const { name } = request.body as any;
+          
             if (!name) {
                 return reply.status(400).send({ error: 'Informe um nome para a coleção.' });
             }
+
             const service = new CollectionsProductService();
             const createdCollection = await service.createCollection(name);
             if (!createdCollection) {
