@@ -35,19 +35,19 @@ model Collection {
 }
 
 model Product {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  price     Float
-  model     String
-  color     String
-  size      String
-  quantity  Int
-  totalSold Int      @default(0)
-  collectionId String   @db.ObjectId
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  price          Float
+  model          String
+  color          String
+  size           String
+  quantity       Int
+  totalSold      Int      @default(0)
+  collectionId   String   @db.ObjectId
   collectionName String
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Sale      Sale[]
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  Sale           Sale[]
 
   @@map("products")
 }
@@ -61,6 +61,8 @@ model Sale {
   createdAt     DateTime @default(now())
   paymentMethod String
   clientName    String
-
+  saleCode      String   @unique
+  sellerId      String   @db.ObjectId
+  sellerName    String
   @@map("sales")
 }

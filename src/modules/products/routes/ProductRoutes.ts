@@ -63,4 +63,10 @@ export async function ProductRoutes(fastify: FastifyInstance, options: FastifyPl
         return new ProductController().getTopProducts(request, reply);
     });
 
+    fastify.get('/product-single', {
+        preValidation: [authenticate],
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        return new ProductController().getProductById(request, reply);
+    }) 
+
 }

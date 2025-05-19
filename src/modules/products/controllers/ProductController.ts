@@ -108,10 +108,10 @@ export class ProductController {
             }
 
 
-            const deletedProduct = await service.statusProduct(id, active);
+            const status = await service.statusProduct(id, active);
 
 
-            if (!deletedProduct) {
+            if (!status) {
                 return reply.status(400).send({ error: 'Não foi possível alterar o status do Produto.' });
             }
 

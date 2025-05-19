@@ -2,7 +2,11 @@ import prisma from "../../../prisma";
 
 export class CollectionsProductService {
     async getAllCollections() {
-        return await prisma.collection.findMany();
+        return await prisma.collection.findMany({
+            orderBy: {
+            createdAt: 'desc'
+            }
+        });
     }
 
     async createCollection(name: string) {

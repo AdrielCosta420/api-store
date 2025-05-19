@@ -6,6 +6,9 @@ interface RegisterSalesProps {
     totalPrice: number;
     paymentMethod?: string;
     clientName?: string;
+    sellerName?: string;
+    sellerId?: string;
+    saleCode?: string;
 }
 
 export class SalesService {
@@ -15,9 +18,11 @@ export class SalesService {
         totalPrice,
         paymentMethod,
         clientName,
+        sellerName,
+        sellerId,
     }: RegisterSalesProps) {
         try {
-      
+
             if (!productId || quantity == null || totalPrice == null) {
                 throw new Error("Todos os campos obrigatórios devem ser preenchidos.");
             }
@@ -30,7 +35,7 @@ export class SalesService {
                 throw new Error("O preço total não pode ser negativo.");
             }
 
-            
+
             const product = await prisma.product.findUnique({
                 where: { id: productId },
             });
@@ -43,7 +48,8 @@ export class SalesService {
                 throw new Error("Quantidade maior que a disponível no estoque.");
             }
 
-            // Transação: Atualiza o produto e cria a venda
+            const saleCode = await this.generateUniqueSaleCode();
+
             const [updatedProduct, sale] = await prisma.$transaction([
                 prisma.product.update({
                     where: { id: productId },
@@ -59,6 +65,9 @@ export class SalesService {
                         totalPrice,
                         paymentMethod: paymentMethod || "",
                         clientName: clientName || "",
+                        saleCode,
+                        sellerId: sellerId || "",
+                        sellerName: sellerName || "",
                     },
                 }),
             ]);
@@ -76,7 +85,7 @@ export class SalesService {
         try {
             const pageSize = 10;
             const skip = (page - 1) * pageSize;
-    
+
             const [sales, totalCount] = await prisma.$transaction([
                 prisma.sale.findMany({
                     skip,
@@ -86,7 +95,7 @@ export class SalesService {
                 }),
                 prisma.sale.count(),
             ]);
-    
+
             return {
                 currentPage: page,
                 totalPages: Math.ceil(totalCount / pageSize),
@@ -108,6 +117,27 @@ export class SalesService {
         } catch (error: unknown) {
             throw new Error("Erro ao buscar as últimas vendas.");
         }
+    }
+
+    async generateUniqueSaleCode(): Promise<string> {
+        const maxAttempts = 5;
+
+        for (let i = 0; i < maxAttempts; i++) {
+            const now = new Date();
+            const datePart = now.toISOString().slice(0, 10).replace(/-/g, ''); // ex: 20240519
+            const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase(); // ex: ABC123
+            const code = `S-${datePart}-${randomPart}`;
+
+            const existing = await prisma.sale.findUnique({
+                where: { saleCode: code },
+            });
+
+            if (!existing) {
+                return code;
+            }
+        }
+
+        throw new Error("Falha ao gerar código de venda único. Tente novamente.");
     }
 }
 

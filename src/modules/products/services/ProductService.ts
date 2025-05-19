@@ -8,7 +8,7 @@ interface CreateProductProps {
     size: string;
     quantity: number;
     collectionName: string;
-    collectionId: string; 
+    collectionId: string;
 
 
 }
@@ -20,7 +20,7 @@ export class ProductService {
             throw new Error('Preencha todos os campos.')
         }
 
-        if (quantity < 0 ) {
+        if (quantity < 0) {
             throw new Error('Quantidade não pode ser negativa.')
         }
 
@@ -30,23 +30,23 @@ export class ProductService {
 
         const product = await prisma.product.create({
             data: {
-            model: model,
-            price: price,
-            color: color,
-            size: size,
-            quantity: quantity,
-            active: true,
-            collectionId: collectionId,
-            collectionName: collectionName
+                model: model,
+                price: price,
+                color: color,
+                size: size,
+                quantity: quantity,
+                active: true,
+                collectionId: collectionId,
+                collectionName: collectionName
             }
         });
 
         await prisma.collection.update({
             where: { id: collectionId },
             data: {
-            products: {
-                push: product.id
-            }
+                products: {
+                    push: product.id
+                }
             }
         });
 
@@ -58,13 +58,13 @@ export class ProductService {
         if (!id) {
             throw new Error("Id do produto não informado ou inválido.");
         }
-       
+
         await prisma.product.update({
             where: { id },
             data: { active: active }
-          });
+        });
 
-      
+
         return { message: 'Produto Desativado com sucesso!' };
     }
 
@@ -72,13 +72,13 @@ export class ProductService {
         console.log('get all products');
         const products = await prisma.product.findMany({ where: { active: true } });
 
-        
+
         return products;
     }
 
     async getProductById(id: string) {
         console.log('get product id: ', id);
-        
+
         if (!id) {
             throw new Error("Solicitação Inválida");
         }
@@ -91,7 +91,7 @@ export class ProductService {
         if (!product) {
             throw new Error("Produto não encontrado.");
         }
-        
+
         return product;
     }
 
@@ -109,10 +109,43 @@ export class ProductService {
             throw new Error("Produto não encontrado.");
         }
 
-        return await prisma.product.update({
+        const productUpdated = await prisma.product.update({
             where: { id: findProduct.id },
             data: data
         });
+
+        if (data.collectionId !== findProduct.collectionId) {
+
+            const oldCollection = await prisma.collection.findUnique({
+                where: { id: findProduct.collectionId }
+            });
+
+            if (oldCollection && oldCollection.products) {
+                const updatedProducts = oldCollection.products.filter(
+                    productId => productId !== productUpdated.id
+                );
+
+                await prisma.collection.update({
+                    where: { id: findProduct.collectionId },
+                    data: {
+                        products: {
+                            set: updatedProducts
+                        }
+                    }
+                });
+            }
+        }
+        await prisma.collection.update({
+            where: { id: data.collectionId },
+            data: {
+                products: {
+                    push: productUpdated.id
+                }
+            }
+        });
+
+        return productUpdated;
+
     }
 
     async getProductsByCollectionId(collectionId: string) {
@@ -122,7 +155,8 @@ export class ProductService {
 
         const products = await prisma.product.findMany({
             where: {
-                collectionId: collectionId
+                collectionId: collectionId,
+                active: true
             }
         });
 

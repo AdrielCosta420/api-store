@@ -3,7 +3,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 
 export class SaleController {
     async registerSale(request: FastifyRequest, reply: FastifyReply) {
-        const { productId, quantity, totalPrice, paymentMethod, clientName } = request.body as any;
+        const { productId, quantity, totalPrice, paymentMethod, clientName, sellerId, sellerName } = request.body as any;
         const salesService = new SalesService();
 
         try {
@@ -13,7 +13,8 @@ export class SaleController {
                 totalPrice,
                 paymentMethod,
                 clientName,
-            
+                sellerId,
+                sellerName
             });
             return reply.status(201).send(sale);
         } catch (error) {
