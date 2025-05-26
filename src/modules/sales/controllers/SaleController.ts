@@ -28,6 +28,7 @@ export class SaleController {
         const salesService = new SalesService();
 
         try {
+            console.log('Fetching sales data...');
             const sales = await salesService.getSales();
             return reply.status(200).send(sales);
         } catch (error) {
